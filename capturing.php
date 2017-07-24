@@ -1,5 +1,6 @@
 <?php
-/* 
+
+/*
  * Copyright (C) 2017 mysli
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +19,7 @@
 include_once 'config.php';
 
 /**
- * Description of erfassung
+ * Description of Capturing
  *
  * @author mysli
  * @version 20170724
@@ -75,24 +76,22 @@ class Validator {
 
 }
 
-class Erfassung {
+class Capturing {
 
 //The individual Regex pattern to check the Digits.
     const EPOWER_PATTERN = '/(^\d{1,7}$)/'; //numbers only, max.7
     const GAS_PATTERN = '/(^\d{1,5}$)/';
     const WATER_PATTERN = '/(^\d{1,7}$)/';
     const NOTE_PATTERN = '/([\w ?!ÄÖÜäöü,]{0,20})/'; //max 20chars and Space,?.!
-//    const USER = ;//'erfasser';
-    const PASS = 'rolli2017';
-    const SQL_INSERT_EPOWER = 'INSERT INTO epower (CaptureDate,Value,AbsoluteValue,Note) VALUES(?,?,?,?)';
-    const SQL_INSERT_GAS = 'INSERT INTO gas (CaptureDate,Value,AbsoluteValue,Note) VALUES(?,?,?,?)';
-    const SQL_INSERT_WATER = 'INSERT INTO water (CaptureDate,Value,AbsoluteValue,Note) VALUES(?,?,?,?)';
-    const SQL_INIT_EPOWER = 'SELECT Value FROM epower WHERE AbsoluteValue= ?';
-    const SQL_INIT_GAS = 'SELECT Value FROM gas WHERE AbsoluteValue= ?';
-    const SQL_INIT_WATER = 'SELECT Value FROM water WHERE AbsoluteValue= ?';
-    const SQL_INIT_EPOWERABS = 'SELECT MAX(AbsoluteValue) FROM epower';
-    const SQL_INIT_GASABS = 'SELECT MAX(AbsoluteValue) FROM gas';
-    const SQL_INIT_WATERABS = 'SELECT MAX(AbsoluteValue) FROM water';
+    const SQL_INSERT_EPOWER = 'INSERT INTO consumption.epower (CaptureDate,Value,AbsoluteValue,Note) VALUES(?,?,?,?)';
+    const SQL_INSERT_GAS = 'INSERT INTO consumption.gas (CaptureDate,Value,AbsoluteValue,Note) VALUES(?,?,?,?)';
+    const SQL_INSERT_WATER = 'INSERT INTO consumption.water (CaptureDate,Value,AbsoluteValue,Note) VALUES(?,?,?,?)';
+    const SQL_INIT_EPOWER = 'SELECT Value FROM consumption.epower WHERE AbsoluteValue= ?';
+    const SQL_INIT_GAS = 'SELECT Value FROM consumption.gas WHERE AbsoluteValue= ?';
+    const SQL_INIT_WATER = 'SELECT Value FROM consumption.water WHERE AbsoluteValue= ?';
+    const SQL_INIT_EPOWERABS = 'SELECT MAX(AbsoluteValue) FROM consumption.epower';
+    const SQL_INIT_GASABS = 'SELECT MAX(AbsoluteValue) FROM consumption.gas';
+    const SQL_INIT_WATERABS = 'SELECT MAX(AbsoluteValue) FROM consumption.water';
 
     private $EPowerValidator;
     private $GasValidator;
@@ -114,20 +113,21 @@ class Erfassung {
     public $WaterRecord = NULL;
 
     function openDB() {
-        $this->dbh = new PDO('mysql:host=localhost;dbname=verbrauchsdaten', MYSQL_USER, MYSQL_PASS);
+        echo HOSTNAME;
+        $this->dbh = new PDO('mysql:host=' . HOSTNAME . ';dbname=' . DATABASE, MYSQL_USER, MYSQL_PASS);
         return isset($this->dbh);
     }
 
     function init() {
         try {
             if ($this->openDB()) {
-                $this->sthepower = $this->dbh->prepare(Erfassung::SQL_INSERT_EPOWER, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
-                $this->sthgas = $this->dbh->prepare(Erfassung::SQL_INSERT_GAS, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
-                $this->sthwater = $this->dbh->prepare(Erfassung::SQL_INSERT_WATER, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
+                $this->sthepower = $this->dbh->prepare(Capturing::SQL_INSERT_EPOWER, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
+                $this->sthgas = $this->dbh->prepare(Capturing::SQL_INSERT_GAS, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
+                $this->sthwater = $this->dbh->prepare(Capturing::SQL_INSERT_WATER, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
 
-                $this->sthepowerinit = $this->dbh->prepare(Erfassung::SQL_INIT_EPOWER);
-                $this->sthgasinit = $this->dbh->prepare(Erfassung::SQL_INIT_GAS);
-                $this->sthwaterinit = $this->dbh->prepare(Erfassung::SQL_INIT_WATER);
+                $this->sthepowerinit = $this->dbh->prepare(Capturing::SQL_INIT_EPOWER);
+                $this->sthgasinit = $this->dbh->prepare(Capturing::SQL_INIT_GAS);
+                $this->sthwaterinit = $this->dbh->prepare(Capturing::SQL_INIT_WATER);
 
                 $this->initRecord();
             } else {
@@ -142,9 +142,9 @@ class Erfassung {
     function initRecord() {
 
         try {
-            $this->EPowerRecord->absoluteValue = ($this->dbh->query(Erfassung::SQL_INIT_EPOWERABS)->fetch()[0]);
-            $this->GasRecord->absoluteValue = ($this->dbh->query(Erfassung::SQL_INIT_GASABS)->fetch()[0]);
-            $this->WaterRecord->absoluteValue = ($this->dbh->query(Erfassung::SQL_INIT_WATERABS)->fetch()[0]);
+            $this->EPowerRecord->absoluteValue = ($this->dbh->query(Capturing::SQL_INIT_EPOWERABS)->fetch()[0]);
+            $this->GasRecord->absoluteValue = ($this->dbh->query(Capturing::SQL_INIT_GASABS)->fetch()[0]);
+            $this->WaterRecord->absoluteValue = ($this->dbh->query(Capturing::SQL_INIT_WATERABS)->fetch()[0]);
             //($this->sthepowerinit->execute(array($this->EPowerRecord->absoluteValue)));
             //var_dump($this->EPowerRecord->absoluteValue);
 
@@ -169,12 +169,6 @@ class Erfassung {
             if (is_null($this->WaterRecord->value)) {
                 $this->WaterRecord->value = 0;
             }
-
-
-
-            //  $this->EPowerRecord->value = ($this->dbh->query(Erfassung::SQL_INIT_EPOWER)->fetch()[0]);
-            //  $this->GasRecord->value = ($this->dbh->query(Erfassung::SQL_INIT_GAS)->fetch()[0]);
-            //  $this->WaterRecord->value = ($this->dbh->query(Erfassung::SQL_INIT_WATER)->fetch()[0]);
         } catch (Exception $e) {
             print "Error connecting Database!: " . $e->getMessage() . "<br/>";
         }
@@ -216,17 +210,17 @@ class Erfassung {
      * @param type $sth
      */
     function writeData($captureDate, $reading, $note, $validator, $record, $sth) {
-        error_log("$reading",0);
+        error_log("$reading", 0);
         $isvalid = $validator->validate($reading);
-        error_log("isvalid?"."$isvalid",0);
+        error_log("isvalid?" . "$isvalid", 0);
         if ($isvalid && isset($captureDate)) {
             $record->delta = $this->getDelta($record->value, $reading);
-            error_log("delta="."$record->delta",0);
+            error_log("delta=" . "$record->delta", 0);
             if ($record->delta > 0) {
                 $record->value = $reading;
                 $record->absoluteValue = $record->absoluteValue + $record->delta;
                 $sth->execute(array($captureDate, $record->value, $record->absoluteValue, $this->trimNote($note)));
-                 error_log("$captureDate"." recordvalue="."$record->value"." $record->absoluteValue",0);
+                error_log("$captureDate" . " recordvalue=" . "$record->value" . " $record->absoluteValue", 0);
             }
         } else {
 //print ("Invalid Input");
@@ -252,7 +246,7 @@ class Erfassung {
         $captureDate = $this->readAbleseDatum('waterablesedatum');
         $reading = filter_input(INPUT_POST, 'water');
         $note = filter_input(INPUT_POST, 'waternote');
-        
+
         $this->writeData($captureDate, $reading, $note, $this->WaterValidator, $this->WaterRecord, $this->sthwater);
     }
 
@@ -281,7 +275,7 @@ class Erfassung {
             $this->openDB();
             $this->writeEPower();
             $this->writeGas();
-           $this->writeWater();
+            $this->writeWater();
             $this->closeDB();
         } catch (PDOException $e) {
             print "Error connecting Database!: " . $e->getMessage() . "<br/>";

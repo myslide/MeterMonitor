@@ -12,8 +12,8 @@
     </head>
     <body>
         <?php
-        require_once ( 'erfassung.php' );
-        $acq = new Erfassung();
+        require_once ( 'capturing.php' );
+        $acq = new Capturing();
         ?>
 
         <h1>Zählerstand eintragen</h1>
