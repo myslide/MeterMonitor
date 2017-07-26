@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 include_once 'config.php';
+require_once ( 'report.php' );
 
 /**
  * Description of Capturing
@@ -59,10 +60,12 @@ class Record {
     public $delta = 0;
     public $absoluteValue = 0;
     public $captureDate;
+    public $report;
 
 }
 
 class NumberValidator {
+
     private $NumberPattern = '.';
 
     public function __construct($NumberPattern) {
@@ -73,9 +76,11 @@ class NumberValidator {
     public function validate($toCheck) {
         return (isset($toCheck) && (preg_match($this->NumberPattern, $toCheck, $wert) == 1) && $toCheck > 0);
     }
+
 }
 
 class TextValidator {
+
     private $Pattern = '.';
 
     public function __construct($Pattern) {
@@ -86,9 +91,11 @@ class TextValidator {
     public function validate($toCheck) {
         return (isset($toCheck) && (preg_match($this->Pattern, $toCheck, $wert) == 1));
     }
+
 }
 
 class Capturing {
+
 //The individual Regex pattern to check the Digits.
     const EPOWER_PATTERN = '/(^\d{1,7}$)/'; //numbers only, max.7
     const GAS_PATTERN = '/(^\d{1,5}$)/';
@@ -122,6 +129,9 @@ class Capturing {
     public $EPowerRecord = NULL;
     public $GasRecord = NULL;
     public $WaterRecord = NULL;
+    public $EPowerReport;
+    public $GasReport;
+    public $WaterReport;
 
     function openDB() {
         $this->dbh = new PDO('mysql:host=' . HOSTNAME . ';dbname=' . DATABASE, MYSQL_USER, MYSQL_PASS);
@@ -177,6 +187,12 @@ class Capturing {
             if (is_null($this->WaterRecord->value)) {
                 $this->WaterRecord->value = 0;
             }
+            $this->EPowerReport = new Report($this->dbh, 'epower');
+            $this->GasReport = new Report($this->dbh, 'gas');
+            $this->WaterReport = new Report($this->dbh, 'water');
+            $this->EPowerRecord->report = $this->EPowerReport->getReportVO();
+            $this->GasRecord->report = $this->GasReport->getReportVO();
+            $this->WaterRecord->report = $this->WaterReport->getReportVO();
         } catch (Exception $e) {
             print "Error connecting Database!: " . $e->getMessage() . "<br/>";
         }
@@ -211,14 +227,12 @@ class Capturing {
      * @param type $sth
      */
     function writeData($captureDate, $reading, $note, $validator, $record, $sth) {
-        error_log("$reading", 0);
         $isvalid = $validator->validate($reading);
         if ($isvalid && isset($captureDate)) {
             $record->delta = $this->getDelta($record->value, $reading);
             if ($record->delta > 0) {
                 $record->value = $reading;
                 $record->absoluteValue = $record->absoluteValue + $record->delta;
-                error_log($this->trimNote($note), 0);
                 $sth->execute(array($captureDate, $record->value, $record->absoluteValue, $this->trimNote($note)));
             }
         } else {
@@ -257,16 +271,16 @@ class Capturing {
         $this->closeDB();
     }
 
-    public function getEPowerRecord() {
-        return $this->EPowerRecord->value;
+    public function getEPowerRecord():Record {
+        return $this->EPowerRecord;
     }
 
-    public function getGasRecord() {
-        return $this->GasRecord->value;
+    public function getGasRecord():Record {
+        return $this->GasRecord;
     }
 
-    public function getWaterRecord() {
-        return $this->WaterRecord->value;
+    public function getWaterRecord():Record {
+        return $this->WaterRecord;
     }
 
     function printInput() {
@@ -275,6 +289,9 @@ class Capturing {
             $this->writeEPower();
             $this->writeGas();
             $this->writeWater();
+            $this->EPowerReport->createReport();
+            $this->GasReport->createReport();
+            $this->WaterReport->createReport();
             $this->closeDB();
         } catch (PDOException $e) {
             print "Error connecting Database!: " . $e->getMessage() . "<br/>";
@@ -291,6 +308,7 @@ class Capturing {
         $this->GasValidator = new NumberValidator(self::GAS_PATTERN);
         $this->WaterValidator = new NumberValidator(self::WATER_PATTERN);
         $this->NoteValidator = new TextValidator(self::NOTE_PATTERN);
+
         $this->init();
     }
 
