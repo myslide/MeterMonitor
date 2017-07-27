@@ -27,6 +27,7 @@
             </div>
             <div>
             &Delta; letzter Eintrag: <?php print($acq->getEPowerRecord()->report->getDelta()) ?> kWh.
+            vor <?php print($acq->getEPowerRecord()->report->getCaptureInterval().' Tag'.(($acq->getEPowerRecord()->report->getCaptureInterval()==1)? '':'en').' entspricht '.$acq->getEPowerRecord()->report->getConsumptionPerDay()).'kWh pro Tag.' ?>
             </div>
             <div id="gas">
                 <h4 id="gas">Gas</h4>
@@ -35,6 +36,8 @@
                 <p>Bemerkung: <input type="text" name="gasnote" /></p>
             </div>
             &Delta; letzter Eintrag: <?php print($acq->getGasRecord()->report->getDelta()) ?> m<sup>3</sup>.
+                      vor <?php print($acq->getGasRecord()->report->getCaptureInterval().' Tag'.(($acq->getGasRecord()->report->getCaptureInterval()==1)? '':'en').' entspricht '.$acq->getGasRecord()->report->getConsumptionPerDay()).'m<sup>3</sup> pro Tag.' ?>
+  
             <div id="water">
                 <h4 id="water">Wasser</h4>
                 <p>Erfasst am: <input type="text" name="waterablesedatum" id="date" value="<?php print("$acq->today") ?>"/></p>
@@ -43,6 +46,8 @@
             </div>
             <div>
             &Delta; letzter Eintrag: <?php print($acq->getWaterRecord()->report->getDelta()) ?> m<sup>3</sup>.
+                      vor <?php print($acq->getWaterRecord()->report->getCaptureInterval().' Tag'.(($acq->getWaterRecord()->report->getCaptureInterval()==1)? '':'en').' entspricht '.$acq->getWaterRecord()->report->getConsumptionPerDay()).'m<sup>3</sup> pro Tag.' ?>
+  
             </div>
             <p><input type="submit" /></p>
         </form>
