@@ -17,20 +17,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 include_once 'config.php';
-define("VALUE", "0");
-define("DATE", "1");
+define("VALUE", "1");
+define("DATE", "0");
 
 class ReportVO {
 
     private $delta = 0;
-    private $consumptionDaily = 0;
-    private $consumptionPeriod = 0;
+    public $captureInterval = 0;
+    public $consumptionThisYear = 0;
+    public $consumptionperDay = 0.0;
 
     public function getDelta() {
         return $this->delta;
     }
+
     public function setDelta(int $diff) {
-        return $this->delta=$diff;;
+        return $this->delta = $diff;
+        ;
+    }
+
+    public function getConsumptionThisYear() {
+        return $this->consumptionThisYear;
+    }
+
+    public function getConsumptionPerDay(): float {
+        return $this->consumptionperDay;
+    }
+
+    /**
+     * The date difference btw. current and previous value.
+     * @return type
+     */
+    public function getCaptureInterval(): int {
+        return $this->captureInterval;
     }
 
 }
@@ -43,10 +62,11 @@ class ReportVO {
 class Report {
 
     private $SQL_RECENT_2;
+    private $SQL_YEAR;
     private $dbh = NULL;
     private $vo;
-    
-    public function getReportVO():ReportVO{
+
+    public function getReportVO(): ReportVO {
         return $this->vo;
     }
 
@@ -66,20 +86,26 @@ class Report {
 
     function createReport() {
         $recent2 = $this->dbh->query($this->SQL_RECENT_2);
-        $c = $recent2->rowCount();
         $dif = 0;
+        $dateDiff = new DateInterval('P0D');
         if ($recent2->rowCount() == 2) {
-            foreach ($recent2 as $value) {
-                $dif = $value[VALUE] - $dif;
-            }
-            $dif = -1 * $dif;
-            error_log("$dif");
+            $row1 = $recent2->fetch();
+            $row2 = $recent2->fetch();
+            //if ($row1 != FALSE &&row2!=FALSE) {
+            $dif = $row1[VALUE] - $row2[VALUE];
+
+            $dateDiff = (new DateTime($row1[DATE]))->diff(new DateTime($row2[DATE]));
+            //}
         }
-        $this->vo->setDelta($dif);
+        $this->getReportVO()->captureInterval = $dateDiff->days;
+        $this->getReportVO()->setDelta($dif);
+        $this->getReportVO()->consumptionperDay = $dif / ($dateDiff->days == 0 ? 1 : $dateDiff->days);
+        //$this->getReportVO()->consumptionperDay=
     }
 
     public function __construct($dbh, $table) {
-        $this->SQL_RECENT_2 = 'SELECT AbsoluteValue FROM consumption.' . $table . ' ORDER BY AbsoluteValue DESC  LIMIT 2';
+        $this->SQL_RECENT_2 = 'SELECT CaptureDate,AbsoluteValue FROM consumption.' . $table . ' ORDER BY CaptureDate DESC  LIMIT 2';
+        $this->SQL_Year = 'SELECT CaptureDate,AbsoluteValue FROM consumption.' . $table . ' ORDER BY AbsoluteValue DESC';
         $this->vo = new ReportVO();
         if (isset($dbh)) {
             $this->dbh = $dbh;

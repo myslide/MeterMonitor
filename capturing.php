@@ -94,6 +94,24 @@ class TextValidator {
 
 }
 
+class DateValidator{
+    private $today;
+    /**
+     * check, if given date is equals or lower the current date.
+     * @param type $toCheck
+     * @return type
+     */
+    public function validate($toCheck) {
+        $datediff=(new DateTime($this->today))->diff((new DateTime($toCheck)),false);
+        error_log($datediff->days,0);
+        return (isset($toCheck)&&($datediff->days<=0));
+    }
+       public function __construct($today) {
+        $this->today = $today;
+    }
+    
+}
+
 class Capturing {
 
 //The individual Regex pattern to check the Digits.
@@ -132,6 +150,7 @@ class Capturing {
     public $EPowerReport;
     public $GasReport;
     public $WaterReport;
+    private $dateValidator;
 
     function openDB() {
         $this->dbh = new PDO('mysql:host=' . HOSTNAME . ';dbname=' . DATABASE, MYSQL_USER, MYSQL_PASS);
@@ -201,7 +220,7 @@ class Capturing {
     function readAbleseDatum($fieldName) {
         $datumwert = filter_input(INPUT_POST, $fieldName);
         $datzeit = $datumwert . ' ' . "23:59:00";
-        $datzeit = date('Y-m-d H:i:s', strtotime($datzeit));
+        $datzeit = date(DATEFORMAT, strtotime($datzeit));
         return $datzeit;
     }
 
@@ -228,7 +247,7 @@ class Capturing {
      */
     function writeData($captureDate, $reading, $note, $validator, $record, $sth) {
         $isvalid = $validator->validate($reading);
-        if ($isvalid && isset($captureDate)) {
+        if ($isvalid && $this->dateValidator->validate($captureDate)) {
             $record->delta = $this->getDelta($record->value, $reading);
             if ($record->delta > 0) {
                 $record->value = $reading;
@@ -308,6 +327,7 @@ class Capturing {
         $this->GasValidator = new NumberValidator(self::GAS_PATTERN);
         $this->WaterValidator = new NumberValidator(self::WATER_PATTERN);
         $this->NoteValidator = new TextValidator(self::NOTE_PATTERN);
+        $this->dateValidator=new DateValidator($this->today);
 
         $this->init();
     }
