@@ -15,13 +15,45 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 /**
-Create the used Database structure and then grant access to the database tables with SELECT,INSERT,UPDATE privileges.
-map these user and password into config.php MYSQL_USER and MYSQL_PASS.
+Create the used Database structure and then grant access to the database tables with SELECT,INSERT,UPDATE,DELETE privileges.
+map these user and password into parameters.yml  'database_user:' and 'database_password:'.
  * Author:  mysli
- * Created: 24.07.2017
+ * Created: 14.08.2017
  */
 
 CREATE DATABASE `consumption`;
-CREATE TABLE `consumption`.`epower` ( `CaptureDate` DATE NULL DEFAULT NULL , `SubmitDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , `Value` INT(9) NULL , `AbsoluteValue` INT(11) NOT NULL , `Note` TEXT NULL DEFAULT NULL ) ENGINE = InnoDB CHARSET=utf8 COLLATE utf8_german2_ci;
-CREATE TABLE `consumption`.`gas` ( `CaptureDate` DATE NULL DEFAULT NULL , `SubmitDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , `Value` INT(9) NULL , `AbsoluteValue` INT(11) NOT NULL , `Note` TEXT NULL DEFAULT NULL ) ENGINE = InnoDB CHARSET=utf8 COLLATE utf8_german2_ci;
-CREATE TABLE `consumption`.`water` ( `CaptureDate` DATE NULL DEFAULT NULL , `SubmitDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , `Value` INT(9) NULL , `AbsoluteValue` INT(11) NOT NULL , `Note` TEXT NULL DEFAULT NULL ) ENGINE = InnoDB CHARSET=utf8 COLLATE utf8_german2_ci;
+CREATE TABLE IF NOT EXISTS `epower` (
+  `captureDate` date NOT NULL,
+  `submitDate` datetime NOT NULL,
+  `value` int(11) NOT NULL,
+  `AbsoluteValue` int(11) NOT NULL,
+  `note` varchar(255) COLLATE utf8_german2_ci DEFAULT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UNIQ_8453C9F7342E0551` (`submitDate`),
+  UNIQUE KEY `UNIQ_8453C9F75B39DB79` (`AbsoluteValue`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_german2_ci;
+
+CREATE TABLE IF NOT EXISTS `gas` (
+  `captureDate` date NOT NULL,
+  `submitDate` datetime NOT NULL,
+  `value` int(11) NOT NULL,
+  `AbsoluteValue` int(11) NOT NULL,
+  `note` varchar(255) COLLATE utf8_german2_ci DEFAULT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UNIQ_8453C9F7342E0551` (`submitDate`),
+  UNIQUE KEY `UNIQ_8453C9F75B39DB79` (`AbsoluteValue`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_german2_ci;
+
+CREATE TABLE IF NOT EXISTS `water` (
+  `captureDate` date NOT NULL,
+  `submitDate` datetime NOT NULL,
+  `value` int(11) NOT NULL,
+  `AbsoluteValue` int(11) NOT NULL,
+  `note` varchar(255) COLLATE utf8_german2_ci DEFAULT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UNIQ_8453C9F7342E0551` (`submitDate`),
+  UNIQUE KEY `UNIQ_8453C9F75B39DB79` (`AbsoluteValue`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_german2_ci;

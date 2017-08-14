@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+    {% block header %}
+    {% endblock %}
+    <div class="bs-example" data-example-id="striped-table"> 
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Datum</th>
+                    <th>Zählerstand</th>
+                    <th>Durschnitt/Tag</th> 
+                    <th>Bemerkung</th> 
+                    <th>Optionen</th> 
+                </tr> 
+            </thead> 
+            <tbody>
+                {%for counter in consumption %}
+                    <tr> <th scope="row">{{counter.id}}</th>
+                        <td>{{counter.captureDate|date('d.m.Y')}}</td>
+                        <td>{{counter.value}}</td>
+                        <td>{{counter.dailyAvg}}</td>
+                        <td>{{counter.note}}</td>
+
+                        {% block options %}
+                        {% endblock %}
+                    </tr>
+                {%endfor%}
+
+            </tbody> 
+        </table> </div>
+    {% endblock %}

@@ -1,0 +1,20 @@
+Eintrag in 
+INSTALLATIONS_PFAD/xampp/apache/conf/extra/httpd-vhosts.conf:
+
+<VirtualHost *:80>
+DocumentRoot "M:\Ess2017\Projekte\PHP\VerbrauchsMonitor\web\app_dev.php"
+ServerName www.eval.dev
+ServerAlias www.eval.dev
+<Directory "M:\Ess2017\Projekte\PHP\VerbrauchsMonitor\web">
+AllowOverride All
+Require all Granted
+</Directory>
+</VirtualHost>
+
+Eintrag in WINDOWS\SYSTEM�"\DRIVERS\ETC\hosts
+
+  
+127.0.0.1 www.eval.dev
+
+Aufruf:
+www.eval.dev

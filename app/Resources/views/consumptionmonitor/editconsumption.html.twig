@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+    {% block header %}
+    {% endblock %}
+    <div class="bs-example" data-example-id="striped-table"> 
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Datum</th>
+                    <th>Zählerstand</th>
+                    <th>Durschnitt/Tag</th> 
+                    <th>Optionen</th> 
+                </tr> 
+            </thead> 
+            <tbody>
+                {%for counter in consumption %}
+                    {%if counter.id==edit.id %}
+                        <tr>{{form_start(form)}}
+                            <th scope="row">{{edit.id}}</th>
+                                {{form_errors(form)}}
+                            <td> {{form_widget(form.captureDate)}} </td>
+                            <td> {{form_widget(form.value)}} </td>
+                            <td> - </td>
+                            <td> {{form_widget(form.note)}} </td>
+                            <td> {{form_widget(form.save)}} </td>
+                            <td> {{form_widget(form.cancel)}} </td>
+                            {{form_end(form)}}
+                        </tr>
+                    {%else%}
+                        <tr> <th scope="row">{{counter.id}}</th>
+                            <td>{{counter.captureDate|date('d.m.Y')}}</td>
+                            <td>{{counter.value}}</td>
+                            <td>-</td>
+                            <td>{{counter.note}}</td>
+                            {% block options %}
+                            {% endblock %}
+                        </tr>
+                    {%endif%}
+                {%endfor%}
+
+            </tbody> 
+        </table> </div>
+    {% endblock %}

@@ -1,0 +1,8 @@
+{% extends 'consumptionmonitor/listconsumptions.html.twig' %}
+
+    {% block header %}
+        <h1>Gas </h1>
+    {% endblock %}
+    {% block options %}
+    <td><a href="/consumptionmonitor/editGas/{{counter.id}}" class="btn btn-success">Bearbeiten</a> <a href="/consumptionmonitor/deleteGas/{{counter.id}}" class="btn btn-success">L&ouml;schen</a></td> 
+{% endblock %}
